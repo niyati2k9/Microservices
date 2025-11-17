@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: service-a-deployment
+  labels:
+    app: service-a
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: service-a
+  template:
+    metadata:
+      labels:
+        app: service-a
+    spec:
+      containers:
+          - name: service-a
+            image: service-a:1.0
+            imagePullPolicy: Never
+            env:
+              - name: OTEL_EXPORTER_OTLP_ENDPOINT
+                value: "https://uze28355.live.dynatrace.com/api/v2/otlp"
+              - name: OTEL_EXPORTER_OTLP_HEADERS
+                value: "none"
+              - name: OTEL_TRACES_EXPORTER
+                value: "otlp"
+              - name: OTEL_LOGS_EXPORTER
+                value: "otlp"
+              - name: OTEL_METRICS_EXPORTER
+                value: "none"   # THIS IS IMPORTANT
+              - name: OTEL_SERVICE_NAME
+                value: "service-a"
+            command:
+                - "java"
+                - "-javaagent:/otel/opentelemetry-javaagent.jar"
+                - "-jar"
+                - "/app.jar"
+            ports:
+              - containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: service-a
+spec:
+  selector:
+    app: service-a
+  ports:
+    - port: 8080
+      targetPort: 8080
+  type: NodePort

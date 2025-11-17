@@ -1,0 +1,16 @@
+version: '3'
+services:
+  service-b:
+    image: service-b:latest
+    container_name: service-b
+    ports:
+      - "8081:8081"
+
+  service-a:
+    image: service-a:latest
+    container_name: service-a
+    ports:
+      - "8080:8080"
+    depends_on:
+      - service-b
+
